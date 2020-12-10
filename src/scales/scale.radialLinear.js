@@ -176,8 +176,12 @@ function drawPointLabels(scale) {
 	ctx.textBaseline = 'middle';
 
 	for (let i = scale.chart.data.labels.length - 1; i >= 0; i--) {
+		const labelLines = scale.pointLabels[i].split("\n")
 		// Extra pixels out for some label spacing
-		const extra = (i === 0 ? tickBackdropHeight / 2 : 0);
+		let extra = (i === 0 ? tickBackdropHeight / 2 : 0);
+		if (i === 0 && labelLines.length > 1) {
+			extra += labelLines.length * 6
+		}
 		const pointLabelPosition = scale.getPointPosition(i, outerDistance + extra + 5);
 
 		const context = scale.getContext(i);
@@ -188,7 +192,14 @@ function drawPointLabels(scale) {
 		const angle = toDegrees(scale.getIndexAngle(i));
 		ctx.textAlign = getTextAlignForAngle(angle);
 		adjustPointPositionForLabelHeight(angle, scale._pointLabelSizes[i], pointLabelPosition);
-		fillText(ctx, scale.pointLabels[i], pointLabelPosition, plFont.lineHeight);
+
+		if (labelLines.length > 1) {
+			labelLines.forEach(function(labelLine, lineIndex) {
+				fillText(ctx, labelLine ? labelLine : '', pointLabelPosition, (plFont.lineHeight + 10) * (lineIndex + 1));
+			});
+		} else {
+			fillText(ctx, scale.pointLabels[i], pointLabelPosition, plFont.lineHeight);
+		}
 	}
 	ctx.restore();
 }
